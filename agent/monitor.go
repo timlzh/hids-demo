@@ -15,6 +15,8 @@ import (
 	"os"
 
 	"encoding/json"
+
+	"hids/model"
 )
 
 // monitorStart
@@ -41,7 +43,7 @@ func monitorStart(ip string, port int) {
 	go C.startMonitor(C.CString(ip), C.int(port))
 
 	buf := make([]byte, 1024)
-	var data map[string]interface{}
+	var data model.UdpResponse
 	for {
 		n, _, err := serverConn.ReadFromUDP(buf)
 		if err != nil {
@@ -52,6 +54,11 @@ func monitorStart(ip string, port int) {
 		if err != nil {
 			log.Println("json.Unmarshal error: ", err)
 		}
-		log.Println("data: ", data)
+		log.Println("type: ", data.Type)
+		log.Println("data: ", data.Data)
+
+		process := getProcessInfo(data.Data)
+		res, err := json.Marshal(process)
+		log.Println("process: ", string(res))
 	}
 }
