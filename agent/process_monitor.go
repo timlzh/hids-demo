@@ -11,18 +11,19 @@ import "C"
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net"
 	"os"
+
+	"log"
 
 	"hids/model"
 )
 
-// monitorStart
+// processMonitorStart
 //
 //	@param ip string
 //	@param port int
-func monitorStart(ip string, port int) {
+func processMonitorStart(ip string, port int) {
 	log.Println(fmt.Sprintf("Starting System Monitor Tunnel on %s:%d", ip, port))
 
 	udpAddr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", ip, port))
@@ -52,11 +53,26 @@ func monitorStart(ip string, port int) {
 		if err != nil {
 			log.Println("json.Unmarshal error: ", err)
 		}
-		log.Println("type: ", data.Type)
-		log.Println("data: ", data.Data)
+		// log.Println("type: ", data.Type)
+		// log.Println("data: ", data.Data)
 
 		process := getProcessInfo(data.Data)
-		res, err := json.Marshal(process)
-		log.Println("process: ", string(res))
+		// log.Println("process: ", process.Cmdline)
+		// res, err := json.Marshal(process)
+		// log.Println("process: ", string(res))
+
+		warnings := checkProcess(process)
+		if len(warnings) > 0 {
+			for _, warning := range warnings {
+				msg := fmt.Sprintf("Warning: %s", warning.Rule.Description)
+				msg += fmt.Sprintf("\n\tSeverity: %d", warning.Severity)
+				msg += fmt.Sprintf("\n\tProcess: %s", warning.Process.Name)
+				msg += fmt.Sprintf("\n\tPID: %d", warning.Process.Pid)
+				for _, behavior := range warning.Behaviors {
+					msg += fmt.Sprintf("\n\tBehavior: %s", behavior.Value)
+				}
+				log.Println(msg)
+			}
+		}
 	}
 }

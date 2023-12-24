@@ -35,18 +35,20 @@ func DeleteExpression(expression model.Expression) (err error) {
 	return
 }
 
-func GetRuleByField(field string, value ...interface{}) (rule model.Rule, err error) {
-	err = db.DB.Where(field+" = ?", value).First(&rule).Error
+func GetRulesByField(field string, value ...interface{}) (rules []model.Rule, err error) {
+	err = db.DB.Where(field+" = ?", value).Find(&rules).Error
 	if err != nil {
 		return
 	}
 
-	expressions := []model.Expression{}
-	err = db.DB.Where("rule_id = ?", rule.ID).Find(&expressions).Error
-	if err != nil {
-		return
-	}
+	for i, rule := range rules {
+		expressions := []model.Expression{}
+		err = db.DB.Where("rule_id = ?", rule.ID).Find(&expressions).Error
+		if err != nil {
+			return
+		}
 
-	rule.Expressions = expressions
+		rules[i].Expressions = expressions
+	}
 	return
 }

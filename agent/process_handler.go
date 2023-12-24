@@ -2,10 +2,13 @@ package agent
 
 import (
 	"fmt"
-	"log"
 	"os"
 
+	"log"
+
+	"hids/api"
 	"hids/model"
+	"hids/utils"
 )
 
 // getProcessCWD
@@ -15,7 +18,7 @@ import (
 func getProcessCWD(pid int) string {
 	cwd, err := os.Readlink(fmt.Sprintf("/proc/%d/cwd", pid))
 	if err != nil {
-		log.Println("error Readlink: ", err)
+		// log.Println("error Readlink: ", err)
 		return ""
 	}
 	return cwd
@@ -28,7 +31,7 @@ func getProcessCWD(pid int) string {
 func getProcessName(pid int) string {
 	name, err := os.Readlink(fmt.Sprintf("/proc/%d/exe", pid))
 	if err != nil {
-		log.Println("error Readlink: ", err)
+		// log.Println("error Readlink: ", err)
 		return ""
 	}
 	return name
@@ -41,7 +44,7 @@ func getProcessName(pid int) string {
 func getProcessCmdline(pid int) string {
 	cmdline, err := os.ReadFile(fmt.Sprintf("/proc/%d/cmdline", pid))
 	if err != nil {
-		log.Println("error ReadFile: ", err)
+		// log.Println("error ReadFile: ", err)
 		return ""
 	}
 	return string(cmdline)
@@ -54,7 +57,7 @@ func getProcessCmdline(pid int) string {
 func getProcessEnv(pid int) string {
 	env, err := os.ReadFile(fmt.Sprintf("/proc/%d/environ", pid))
 	if err != nil {
-		log.Println("error ReadFile: ", err)
+		// log.Println("error ReadFile: ", err)
 		return ""
 	}
 	return string(env)
@@ -70,4 +73,63 @@ func getProcessInfo(process model.Process) model.Process {
 	process.Name = getProcessName(process.Pid)
 	process.Env = getProcessEnv(process.Pid)
 	return process
+}
+
+// checkProcess
+//
+//	@param process model.Process
+//	@return []model.Warning
+func checkProcess(process model.Process) []model.Warning {
+	warnings := []model.Warning{}
+	rules, err := api.GetRulesByField("type", "process")
+	if err != nil {
+		log.Println("error GetRuleByField: ", err)
+		return warnings
+	}
+
+	for _, rule := range rules {
+		result := true
+		warning := model.Warning{
+			Severity: rule.Severity,
+			Process:  process,
+			Rule:     rule,
+		}
+		for _, expression := range rule.Expressions {
+			switch expression.Field {
+			case "name":
+				result = result && utils.CheckExpression(expression, process.Name)
+				warning.Behaviors = append(warning.Behaviors, model.Behavior{
+					Field: expression.Field,
+					Value: process.Name,
+				})
+			case "cwd":
+				result = result && utils.CheckExpression(expression, process.CWD)
+				warning.Behaviors = append(warning.Behaviors, model.Behavior{
+					Field: expression.Field,
+					Value: process.CWD,
+				})
+			case "cmdline":
+				result = result && utils.CheckExpression(expression, process.Cmdline)
+				warning.Behaviors = append(warning.Behaviors, model.Behavior{
+					Field: expression.Field,
+					Value: process.Cmdline,
+				})
+			case "env":
+				result = result && utils.CheckExpression(expression, process.Env)
+				warning.Behaviors = append(warning.Behaviors, model.Behavior{
+					Field: expression.Field,
+					Value: process.Env,
+				})
+			}
+
+			if !result {
+				break
+			}
+		}
+		if result {
+			warnings = append(warnings, warning)
+		}
+	}
+
+	return warnings
 }
