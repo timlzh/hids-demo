@@ -8,7 +8,7 @@ type Process struct {
 	Name    string `json:"name"`
 	CWD     string `json:"cwd"`
 	Cmdline string `json:"cmdline"`
-	Env	 string `json:"env"`
+	Env     string `json:"env"`
 }
 
 type UdpResponse struct {

@@ -9,12 +9,11 @@ package agent
 import "C"
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
 	"os"
-
-	"encoding/json"
 
 	"hids/model"
 )
@@ -24,8 +23,7 @@ import (
 //	@param ip string
 //	@param port int
 func monitorStart(ip string, port int) {
-	// ip := "127.0.0.1"
-	// port := 65530
+	log.Println(fmt.Sprintf("Starting System Monitor Tunnel on %s:%d", ip, port))
 
 	udpAddr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", ip, port))
 	if err != nil {

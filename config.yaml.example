@@ -1,0 +1,12 @@
+database:
+  type: 'sqlite'
+  sqlite:
+    path: 'database.db'
+  mysql:
+    host: '127.0.0.1'
+    port: 3306
+    username: 'hidsAdmin'
+    password: 'h1d5Adm1n'
+    name: 'hids'
+  max-open-connections: 100
+  max-idle-connections: 10

@@ -1,3 +1,5 @@
 main
 .vscode
 udpClient.py
+config.yaml
+*.db

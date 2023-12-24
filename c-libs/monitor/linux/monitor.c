@@ -83,7 +83,6 @@ static int set_proc_ev_listen(int netlinkSock, bool enable) {
  * @return 0 on success, -1 on error
  */
 static int handle_proc_ev(int netlinkSock, int rev_sock, struct sockaddr_in server) {
-    
     struct __attribute__((aligned(NLMSG_ALIGNTO))) {
         struct nlmsghdr nl_hdr;
         struct __attribute__((__packed__)) {
