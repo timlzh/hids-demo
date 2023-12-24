@@ -11,10 +11,9 @@ import "C"
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net"
 	"os"
-
-	"log"
 
 	"hids/model"
 )

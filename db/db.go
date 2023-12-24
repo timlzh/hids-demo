@@ -52,6 +52,21 @@ func InitDB() {
 				},
 			},
 		},
+		{
+			ID:          3,
+			Name:        "Sql Injection",
+			Description: "Sql Injection",
+			Type:        "network",
+			Severity:    2,
+			IsEnable:    true,
+			Expressions: []model.Expression{
+				{
+					Field:      "payload",
+					Expression: "select.*?from.*?",
+					IsRegex:    true,
+				},
+			},
+		},
 	}
 
 	for _, rule := range defaultRules {

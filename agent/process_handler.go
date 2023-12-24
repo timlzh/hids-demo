@@ -2,9 +2,8 @@ package agent
 
 import (
 	"fmt"
-	"os"
-
 	"log"
+	"os"
 
 	"hids/api"
 	"hids/model"
@@ -91,6 +90,7 @@ func checkProcess(process model.Process) []model.Warning {
 		result := true
 		warning := model.Warning{
 			Severity: rule.Severity,
+			Type:     rule.Type,
 			Process:  process,
 			Rule:     rule,
 		}

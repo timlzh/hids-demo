@@ -27,6 +27,12 @@ type Config struct {
 		MaxOpenConnections int `yaml:"max-open-connections"`
 		MaxIdleConnections int `yaml:"max-idle-connections"`
 	} `yaml:"database"`
+
+	Network struct {
+		Monitor struct {
+			Interface string `yaml:"interface"`
+		} `yaml:"monitor"`
+	} `yaml:"network"`
 }
 
 var config *Config

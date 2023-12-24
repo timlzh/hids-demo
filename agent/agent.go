@@ -1,5 +1,10 @@
 package agent
 
 func Run(ip string, port int) {
-	processMonitorStart(ip, port)
+	go processMonitorStart(ip, port)
+	go networkMonitorStart(ip, port)
+
+	for {
+		// TODO
+	}
 }

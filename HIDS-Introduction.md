@@ -83,6 +83,7 @@ Windows 系统中的注册表是一个重要的配置数据库，记录了系统
 # This is the end of the legacy x32 range.  Numbers 548 and above are
 # not special and are not to be used for x32-specific syscalls.
 ```
+
 *Code 1 - arch/x86/entry/syscalls/syscall_64.tbl文件片段[^8]*
 
 Windows 下 HIDS 通常监控 DLL 函数调用踪迹，来生成一个正常行为的模型。当 DLL 函数调用的行为与模型不符时，IDS 就会判断为异常行为。表 1 列出了 Windows 下 HIDS 关注的部分重点 DLL 文件。
@@ -100,7 +101,7 @@ Windows 下 HIDS 通常监控 DLL 函数调用踪迹，来生成一个正常行�
 
 在 Garcı́a-Teodoro 等人的研究[^7]中，列出了 IDS 一些常用的异常检测方法：
 
-![图 1](http://pic.timlzh.com/i/2023/12/24/2f5dlq-2.png) 
+![图 1](http://pic.timlzh.com/i/2023/12/24/2f5dlq-2.png)
 *图 1 - 异常检测技术分类[^7]*
 
 #### 基于统计
@@ -177,6 +178,7 @@ static int nl_connect() {
     return netlinkSock;
 }
 ```
+
 *Code 2 - netlink 机制的使用*
 
 在内核态中，可以通过 `netlink` 机制，监听到进程的创建、退出、执行的系统调用等。如 Code 3 所示，`netlink` 机制的回调函数中，可以通过 `nlcn_msg.proc_ev.what` 来判断进程的行为，然后通过 `nlcn_msg.proc_ev.event_data` 来获取进程的信息。Code 3中，将进程的行为通过 `udp` socket 发送给服务器，服务器可以根据这些信息来判断是否为异常行为。
@@ -262,6 +264,7 @@ static int handle_proc_ev(int netlinkSock, int rev_sock, struct sockaddr_in serv
     return 0;
 }
 ```
+
 *Code 3 - netlink 机制的回调函数*
 
 在 golang 中，可以通过 `cgo` 启动上述 c 的监听器，然后通过 `udp` socket 接收消息，如 Code 4 所示。
@@ -396,7 +399,52 @@ func getProcessInfo(process model.Process) model.Process {
     return process
 }
 ```
+
 *Code 5 - 进程信息获取*
+
+### 网络监控
+
+在 Linux 下，可以通过 `pcap` 库来获取网络流量。如 Code 6 所示，通过 `pcap` 库，可以获取到网络流量的源地址、目的地址、源端口、目的端口、协议等信息。
+
+```go
+// getPacketInfo
+//
+// @param pkt *pcap.Packet
+// @param deviceIP string
+// @return packet model.Packet
+func getPacketInfo(pkt *pcap.Packet, deviceIP string) model.Packet {
+ defer func() {
+  if err := recover(); err != nil {
+   // log.Println("getPacketInfo panic: ", err)
+   return
+  }
+ }()
+ // in or out
+ direction := "in"
+ if pkt.IP.SrcAddr() == deviceIP {
+  direction = "out"
+ }
+
+ protocol := "tcp"
+ if pkt.IP.Protocol == 17 {
+  protocol = "udp"
+ }
+
+ packet := model.Packet{
+  SourceIP:   pkt.IP.SrcAddr(),
+  SourcePort: fmt.Sprintf("%d", pkt.TCP.SrcPort),
+  DestIP:     pkt.IP.DestAddr(),
+  DestPort:   fmt.Sprintf("%d", pkt.TCP.DestPort),
+  Protocol:   protocol,
+  Direction:  direction,
+  Payload:    string(pkt.Payload),
+ }
+
+ return packet
+}
+```
+
+*Code 6 - 网络流量获取*
 
 ### 行为匹配
 
@@ -415,7 +463,7 @@ func getProcessInfo(process model.Process) model.Process {
 2. 遍历所有规则，对每一个规则的所有表达式进行匹配；
 3. 如果所有表达式都匹配成功，则判断为异常行为。
 
-Code 6 展示了对进程的匹配过程。扩充数据源 (如通过 `pcap` 获取网络流量、通过 `inotify` 获取文件变化等) 后，用类似的方法也可以进行匹配。
+Code 7 展示了对进程的匹配过程。其他数据源 (如通过 `pcap` 获取网络流量、通过 `inotify` 获取文件变化等) 的匹配过程类似。
 
 ```go
 // checkProcess
@@ -478,11 +526,12 @@ func checkProcess(process model.Process) []model.Warning {
     return warnings
 }
 ```
-*Code 6 - 进程匹配*
+
+*Code 7 - 进程匹配*
 
 ### 效果展示
 
-本例简单编写了两种规则，如 Code 7 所示。这两条规则可以用来简单检测两种不同的反弹shell payload。
+本例简单编写了几种规则，如 Code 8 所示。这些规则可以用来简单检测反弹shell payload和sql注入等行为。
 
 ```go
 defaultRules := []model.Rule{
@@ -516,27 +565,46 @@ defaultRules := []model.Rule{
             },
         },
     },
+    {
+        ID:          3,
+        Name:        "Sql Injection",
+        Description: "Sql Injection",
+        Type:        "network",
+        Severity:    2,
+        IsEnable:    true,
+        Expressions: []model.Expression{
+            {
+                Field:      "payload",
+                Expression: "select.*?from.*?",
+                IsRegex:    true,
+            },
+        },
+    },
 }
 ```
+
 *Code 7 - 规则示例*
 
-当进程的行为发生变化时，可以通过匹配规则数据库中的规则，来判断是否为异常行为。如图 3 所示，当进程的命令行参数匹配到了规则中的正则表达式时，就会判断为异常行为。
+当进程的行为发生变化时，可以通过匹配规则数据库中的规则，来判断是否为异常行为。如图 3、图 4 所示，当进程的命令行参数匹配到了规则中的正则表达式时，就会判断为异常行为。
 
 ![图 3](http://pic.timlzh.com/i/2023/12/24/nvsjbs-2.png)  
-*图 3 - 检测效果*
+*图 3 - 进程检测效果*
 
-[^1]: Wikipedia contributors, Host-based intrusion detection system — Wikipedia, The Free Encyclopedia. 2023. [Online]. Available: https://en.wikipedia.org/w/index.php?title=Host-based_intrusion_detection_system&oldid=1185583815.
+![图 4](http://pic.timlzh.com/i/2023/12/24/qq9rkl-2.png)  
+*图 4 - 网络连接检测效果*
+
+[^1]: Wikipedia contributors, Host-based intrusion detection system — Wikipedia, The Free Encyclopedia. 2023. [Online]. Available: <https://en.wikipedia.org/w/index.php?title=Host-based_intrusion_detection_system&oldid=1185583815>.
 
 [^2]: W. Stallings and L. Brown, Computer Security: Principles and Practice, 1st ed. USA: Prentice Hall Press, 2007.
 
-[^3]: Wikipedia contributors, Intrusion detection system — Wikipedia, The Free Encyclopedia. 2023. [Online]. Available: https://en.wikipedia.org/w/index.php?title=Intrusion_detection_system&oldid=1190613453.
+[^3]: Wikipedia contributors, Intrusion detection system — Wikipedia, The Free Encyclopedia. 2023. [Online]. Available: <https://en.wikipedia.org/w/index.php?title=Intrusion_detection_system&oldid=1190613453>.
 
 [^4]: G. Creech, “Developing a high-accuracy cross platform Host-Based Intrusion Detection System capable of reliably detecting zero-day attacks,” 2014.
 
 [^5]: S. Forrest, S. A. Hofmeyr, A. Somayaji, and T. A. Longstaff, “A sense of self for Unix processes,” in Proceedings 1996 IEEE Symposium on Security and Privacy, 1996, pp. 120–128. doi: 10.1109/SECPRI.1996.502675.
 
-[^6]: Tripwire, tripwire-open-source. GitHub, 2019. [Online]. Available: https://github.com/Tripwire/tripwire-open-source.
+[^6]: Tripwire, tripwire-open-source. GitHub, 2019. [Online]. Available: <https://github.com/Tripwire/tripwire-open-source>.
 
 [^7]: P. Garcı́a-Teodoro, J. Dı́az-Verdejo, G. Maciá-Fernández, and E. Vázquez, “Anomaly-Based Network Intrusion Detection: Techniques, Systems and Challenges,” Comput. Secur., vol. 28, no. 1–2, pp. 18–28, Feb. 2009, doi: 10.1016/j.cose.2008.08.003.
 
-[^8]: torvalds, linux. GitHub, 2023. [Online]. Available: https://github.com/torvalds/linux.
+[^8]: torvalds, linux. GitHub, 2023. [Online]. Available: <https://github.com/torvalds/linux>.

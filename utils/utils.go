@@ -1,9 +1,8 @@
 package utils
 
 import (
-	"regexp"
-
 	"log"
+	"regexp"
 
 	"hids/model"
 )

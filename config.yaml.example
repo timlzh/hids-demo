@@ -10,3 +10,7 @@ database:
     name: 'hids'
   max-open-connections: 100
   max-idle-connections: 10
+
+network:
+    monitor:
+        interface: 'eth0'
