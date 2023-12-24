@@ -4,6 +4,7 @@ import (
 	"hids/agent"
 	"hids/config"
 	"hids/db"
+	"hids/webui"
 )
 
 func main() {
@@ -13,5 +14,7 @@ func main() {
 
 	ip := "127.0.0.1"
 	port := 65530
-	agent.Run(ip, port)
+	go agent.Run(ip, port)
+
+	webui.Run()
 }

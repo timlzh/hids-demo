@@ -9,6 +9,11 @@ import (
 )
 
 type Config struct {
+	WebUI struct {
+		Host string `yaml:"host"`
+		Port string `yaml:"port"`
+	} `yaml:"webui"`
+
 	Database struct {
 		Type string `yaml:"type"`
 

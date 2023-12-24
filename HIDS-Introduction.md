@@ -140,7 +140,7 @@ Windows 下 HIDS 通常监控 DLL 函数调用踪迹，来生成一个正常行�
 
 ## 简单 HIDS 的实现
 
-本节简单介绍一下 Linux 下 HIDS 的实现。本例子主要基于 c 配合 golang 实现 (使用 [cgo](https://golang.org/cmd/cgo/) 在 golang 中直接调用 c 函数，利用 `udp socket` 通信)。
+本节简单介绍一下 Linux 下 HIDS 的实现。本例子主要基于 c 配合 golang 实现 (使用 [cgo](https://golang.org/cmd/cgo/) 在 golang 中直接调用 c 函数，利用 `udp socket` 通信)。项目部分思路参考于[^9][^10]。
 
 ### 进程监控
 
@@ -593,6 +593,14 @@ defaultRules := []model.Rule{
 ![图 4](http://pic.timlzh.com/i/2023/12/24/qq9rkl-2.png)  
 *图 4 - 网络连接检测效果*
 
+## 总结
+
+一个完善的 HIDS 远远不止上述的功能，还需要考虑到文件完整性校验、日志监控、注册表监控、系统调用监控等。本例仅仅是一个简单的 HIDS Demo，仅仅实现了进程监控和网络监控，实际功能细节还有待深入讨论和实现。
+
+在 HIDS 的基础上，还可以扩展出 HIPS (Host-based Intrusion Prevention System, 基于主机的入侵预防系统)。HIPS 将 HIDS 的检测能力和防御能力相结合，可以在检测到异常行为后，主动阻止恶意行为的发生。
+
+> 完整项目 Demo 地址：<https://github.com/timlzh/hids-demo>。
+
 [^1]: Wikipedia contributors, Host-based intrusion detection system — Wikipedia, The Free Encyclopedia. 2023. [Online]. Available: <https://en.wikipedia.org/w/index.php?title=Host-based_intrusion_detection_system&oldid=1185583815>.
 
 [^2]: W. Stallings and L. Brown, Computer Security: Principles and Practice, 1st ed. USA: Prentice Hall Press, 2007.
@@ -608,3 +616,7 @@ defaultRules := []model.Rule{
 [^7]: P. Garcı́a-Teodoro, J. Dı́az-Verdejo, G. Maciá-Fernández, and E. Vázquez, “Anomaly-Based Network Intrusion Detection: Techniques, Systems and Challenges,” Comput. Secur., vol. 28, no. 1–2, pp. 18–28, Feb. 2009, doi: 10.1016/j.cose.2008.08.003.
 
 [^8]: torvalds, linux. GitHub, 2023. [Online]. Available: <https://github.com/torvalds/linux>.
+
+[^9]: driverxdw, Felicia. GitHub, 2020. [Online]. Available: <https://github.com/driverxdw/Felicia>.
+
+[^10]: ysrc, yulong-hids-archived. GitHub, 2020. [Online]. Available: <https://github.com/ysrc/yulong-hids-archived>
