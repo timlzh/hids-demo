@@ -13,9 +13,9 @@ type Process struct {
 
 type Packet struct {
 	SourceIP   string `json:"source_ip"`
-	SourcePort string    `json:"source_port"`
+	SourcePort string `json:"source_port"`
 	DestIP     string `json:"dest_ip"`
-	DestPort   string   `json:"dest_port"`
+	DestPort   string `json:"dest_port"`
 	Protocol   string `json:"protocol"`
 	Direction  string `json:"direction"` // in or out
 	Payload    string `json:"payload"`

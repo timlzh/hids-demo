@@ -46,7 +46,6 @@ func getPacketInfo(pkt *pcap.Packet, deviceIP string) model.Packet {
 	return packet
 }
 
-
 // checkPacket
 //
 //	@param packet model.Packet
@@ -71,7 +70,7 @@ func checkPacket(packet model.Packet) []model.Warning {
 		warning := model.Warning{
 			Severity: rule.Severity,
 			Type:     rule.Type,
-			Network: packet,
+			Network:  packet,
 			Rule:     rule,
 		}
 		for _, expression := range rule.Expressions {
