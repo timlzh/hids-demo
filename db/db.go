@@ -70,6 +70,14 @@ func InitDB() {
 	}
 
 	for _, rule := range defaultRules {
-		DB.Create(&rule)
+		rules := []model.Rule{}
+		DB.Where("name = ?", rule.Name).Find(&rules)
+		if len(rules) > 0 {
+			rule.ID = rules[0].ID
+			DB.Where("rule_id = ?", rule.ID).Delete(&model.Expression{})
+			DB.Model(&rules[0]).Updates(rule)
+		} else {
+			DB.Create(&rule)
+		}
 	}
 }

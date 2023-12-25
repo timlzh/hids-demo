@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"hids/agent"
 	"hids/api"
 	"hids/config"
@@ -15,7 +17,7 @@ func main() {
 
 	err := api.ReadRuleFromJson(config.GetConfig().Rule.Path)
 	if err != nil {
-		panic(err)
+		log.Fatal("error ReadRuleFromJson: ", err)
 	}
 
 	ip := "127.0.0.1"

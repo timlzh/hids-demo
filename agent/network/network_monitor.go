@@ -1,4 +1,4 @@
-package agent
+package network
 
 import (
 	"fmt"
@@ -10,11 +10,11 @@ import (
 	pcap "hids/gopcap"
 )
 
-// networkMonitorStart
+// MonitorStart
 //
 //	@param ip string
 //	@param port int
-func networkMonitorStart() {
+func MonitorStart() {
 	intertfaceName := config.GetConfig().Network.Monitor.Interface
 
 	devices, err := pcap.Findalldevs()

@@ -1,7 +1,7 @@
-package agent
+package process
 
 /*
-#cgo CFLAGS: -I../c-libs
+#cgo CFLAGS: -I../../c-libs
 #define GO_ENV
 #include "cJSON/cJSON.c"
 #include "monitor/linux/monitor.c"
@@ -18,11 +18,11 @@ import (
 	"hids/model"
 )
 
-// processMonitorStart
+// MonitorStart
 //
 //	@param ip string
 //	@param port int
-func processMonitorStart(ip string, port int) {
+func MonitorStart(ip string, port int) {
 	log.Printf("Starting System Monitor Tunnel on %s:%d", ip, port)
 
 	udpAddr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", ip, port))

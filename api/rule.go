@@ -25,24 +25,18 @@ func ReadRuleFromJson(path string) (err error) {
 		}
 		if len(rules) > 0 {
 			rule.ID = rules[0].ID
-			err = UpdateRule(&rule)
+
+			err = DeleteExpressionByRuleId(rule.ID)
 			if err != nil {
 				return
 			}
-			err = DeleteExpressionByRuleId(rule.ID)
+
+			err = UpdateRule(&rule)
 			if err != nil {
 				return
 			}
 		} else {
 			err = CreateRule(&rule)
-			if err != nil {
-				return
-			}
-		}
-
-		for _, expression := range rule.Expressions {
-			expression.RuleID = rule.ID
-			err = CreateExpression(&expression)
 			if err != nil {
 				return
 			}
