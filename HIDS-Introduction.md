@@ -1,6 +1,36 @@
 # Host-based Intrusion Detection System
 
-[TOC]
+- [Host-based Intrusion Detection System](#host-based-intrusion-detection-system)
+  - [介绍](#介绍)
+    - [IDS](#ids)
+      - [IDS的组成](#ids的组成)
+      - [IDS的分类](#ids的分类)
+    - [HIDS](#hids)
+  - [HIDS 的数据源](#hids-的数据源)
+    - [系统调用](#系统调用)
+    - [审计记录](#审计记录)
+    - [文件完整性校验](#文件完整性校验)
+    - [注册表监控](#注册表监控)
+  - [IDS 的分析原理](#ids-的分析原理)
+    - [异常检测](#异常检测)
+      - [基于统计](#基于统计)
+      - [基于规则](#基于规则)
+      - [基于机器学习](#基于机器学习)
+    - [特征检测和启发式检测](#特征检测和启发式检测)
+      - [特征检测](#特征检测)
+      - [启发式检测](#启发式检测)
+  - [简单 HIDS 的实现](#简单-hids-的实现)
+    - [进程监控](#进程监控)
+      - [Netlink](#netlink)
+      - [进程信息获取](#进程信息获取)
+    - [网络监控](#网络监控)
+    - [文件系统监控](#文件系统监控)
+    - [行为匹配](#行为匹配)
+      - [规则数据库](#规则数据库)
+      - [规则匹配](#规则匹配)
+    - [效果展示](#效果展示)
+  - [总结](#总结)
+
 
 ## 介绍
 
@@ -202,7 +232,7 @@ static int handle_proc_ev(int netlinkSock, int rev_sock, struct sockaddr_in serv
 
     char buf[256];
     char sendbuffer[256];
-    char *out;
+        if (total <= 5){
     int recvLen;
 
     cJSON *root = cJSON_CreateObject();

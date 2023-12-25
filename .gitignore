@@ -3,3 +3,6 @@ main
 udpClient.py
 config.yaml
 *.db
+*.pdf
+*.tar.gz
+release
