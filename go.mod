@@ -40,6 +40,7 @@ require (
 )
 
 require (
+	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gin-gonic/gin v1.9.1
 	golang.org/x/sys v0.8.0 // indirect
 	gorm.io/driver/mysql v1.5.2

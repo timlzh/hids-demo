@@ -446,6 +446,61 @@ func getPacketInfo(pkt *pcap.Packet, deviceIP string) model.Packet {
 
 *Code 6 - 网络流量获取*
 
+### 文件系统监控
+
+Linux 下可以通过 `inotify` 来监控文件系统的变化。golang 的 [fsnotify](https://github.com/fsnotify/fsnotify)[^11] 库就是基于 `inotify` 实现的。通过 `fsnotify` 库，可以非常容易地控文件系统的变化，如 Code 7 所示。
+
+```go
+package main
+
+import (
+    "log"
+
+    "github.com/fsnotify/fsnotify"
+)
+
+func main() {
+    // Create new watcher.
+    watcher, err := fsnotify.NewWatcher()
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer watcher.Close()
+
+    // Start listening for events.
+    go func() {
+        for {
+            select {
+            case event, ok := <-watcher.Events:
+                if !ok {
+                    return
+                }
+                log.Println("event:", event)
+                if event.Has(fsnotify.Write) {
+                    log.Println("modified file:", event.Name)
+                }
+            case err, ok := <-watcher.Errors:
+                if !ok {
+                    return
+                }
+                log.Println("error:", err)
+            }
+        }
+    }()
+
+    // Add a path.
+    err = watcher.Add("/tmp")
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Block main goroutine forever.
+    <-make(chan struct{})
+}
+```
+
+*Code 7 - 文件系统监控[^11]*
+
 ### 行为匹配
 
 #### 规则数据库
@@ -527,65 +582,90 @@ func checkProcess(process model.Process) []model.Warning {
 }
 ```
 
-*Code 7 - 进程匹配*
+*Code 8 - 进程匹配*
 
 ### 效果展示
 
-本例简单编写了几种规则，如 Code 8 所示。这些规则可以用来简单检测反弹shell payload和sql注入等行为。
+本例简单编写了几种规则，如 Code 9 所示。这些规则可以用来简单监控部分重要文件已以及检测反弹shell payload和sql注入等行为。
 
-```go
-defaultRules := []model.Rule{
+```json
+[
     {
-        ID:          1,
-        Name:        "Bash Reverse Shell",
-        Description: "Bash Reverse Shell",
-        Type:        "process",
-        Severity:    5,
-        IsEnable:    true,
-        Expressions: []model.Expression{
-            {
-                Field:      "cmdline",
-                Expression: "bash\\s+-i\\s+>&\\s+/dev/tcp/.*?",
-                IsRegex:    true,
-            },
-        },
+        "name": "/etc/passwd",
+        "description": "/etc/passwd",
+        "type": "file",
+        "severity": 3,
+        "is_enable": true
+    }, 
+    {
+        "name": "/etc/shadow",
+        "description": "/etc/shadow",
+        "type": "file",
+        "severity": 3,
+        "is_enable": true
+    }, 
+    {
+        "name": "/etc/sudoers",
+        "description": "/etc/sudoers",
+        "type": "file",
+        "severity": 3,
+        "is_enable": true
+    }, 
+    {
+        "name": "/var/www/html",
+        "description": "/var/www/html",
+        "type": "file",
+        "severity": 3,
+        "is_enable": true
     },
     {
-        ID:          2,
-        Name:        "Python Reverse Shell",
-        Description: "Python Reverse Shell",
-        Type:        "process",
-        Severity:    5,
-        IsEnable:    true,
-        Expressions: []model.Expression{
+        "name": "Bash Reverse Shell",
+        "description": "Bash Reverse Shell",
+        "type": "process",
+        "severity": 5,
+        "is_enable": true,
+        "expressions": [
             {
-                Field:      "cmdline",
-                Expression: "python.*?import.*?socket,subprocess,os;.*?",
-                IsRegex:    true,
-            },
-        },
+                "field": "cmdline",
+                "expression": "bash\\s+-i\\s+>&\\s+/dev/tcp/.*?",
+                "is_regex": true
+            }
+        ]
     },
     {
-        ID:          3,
-        Name:        "Sql Injection",
-        Description: "Sql Injection",
-        Type:        "network",
-        Severity:    2,
-        IsEnable:    true,
-        Expressions: []model.Expression{
+        "name": "Python Reverse Shell",
+        "description": "Python Reverse Shell",
+        "type": "process",
+        "severity": 5,
+        "is_enable": true,
+        "expressions": [
             {
-                Field:      "payload",
-                Expression: "select.*?from.*?",
-                IsRegex:    true,
-            },
-        },
+                "field": "cmdline",
+                "expression": "python.*?import.*?socket,subprocess,os;.*?",
+                "is_regex": true
+            }
+        ]
     },
-}
+    {
+        "name": "Sql Injection",
+        "description": "Sql Injection",
+        "type": "network",
+        "severity": 2,
+        "is_enable": true,
+        "expressions": [
+            {
+                "field": "payload",
+                "expression": "select.*?from.*?",
+                "is_regex": true
+            }
+        ]
+    }
+]
 ```
 
-*Code 7 - 规则示例*
+*Code 9 - 规则示例*
 
-当进程的行为发生变化时，可以通过匹配规则数据库中的规则，来判断是否为异常行为。如图 3、图 4 所示，当进程的命令行参数匹配到了规则中的正则表达式时，就会判断为异常行为。
+当进程的行为发生变化时，可以通过匹配规则数据库中的规则，来判断是否为异常行为。如图 3、图 4 所示，当进程的命令行参数匹配到了规则中的正则表达式或文件系统发生改变时，就会判断为异常行为。
 
 ![图 3](http://pic.timlzh.com/i/2023/12/24/nvsjbs-2.png)  
 *图 3 - 进程检测效果*
@@ -593,9 +673,12 @@ defaultRules := []model.Rule{
 ![图 4](http://pic.timlzh.com/i/2023/12/24/qq9rkl-2.png)  
 *图 4 - 网络连接检测效果*
 
+![图 5](http://pic.timlzh.com/i/2023/12/25/porx27-2.png)  
+*图 5 - 文件系统监控效果*
+
 ## 总结
 
-一个完善的 HIDS 远远不止上述的功能，还需要考虑到文件完整性校验、日志监控、注册表监控、系统调用监控等。本例仅仅是一个简单的 HIDS Demo，仅仅实现了进程监控和网络监控，实际功能细节还有待深入讨论和实现。
+一个完善的 HIDS 远远不止上述的功能，还需要考虑到日志监控、注册表监控、系统调用监控等。本例仅仅是一个简单的 HIDS Demo，仅仅实现了进程监控和网络监控，实际功能细节还有待深入讨论和实现。
 
 在 HIDS 的基础上，还可以扩展出 HIPS (Host-based Intrusion Prevention System, 基于主机的入侵预防系统)。HIPS 将 HIDS 的检测能力和防御能力相结合，可以在检测到异常行为后，主动阻止恶意行为的发生。
 
@@ -620,3 +703,5 @@ defaultRules := []model.Rule{
 [^9]: driverxdw, Felicia. GitHub, 2020. [Online]. Available: <https://github.com/driverxdw/Felicia>.
 
 [^10]: ysrc, yulong-hids-archived. GitHub, 2020. [Online]. Available: <https://github.com/ysrc/yulong-hids-archived>
+
+[^11]: fsnotify, fsnotify. GitHub, 2023. [Online]. Available: <https://github.com/fsnotify/fsnotify>.

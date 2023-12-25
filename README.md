@@ -23,6 +23,7 @@ sudo ./hids-demo
 
 - [x] Process Monitoring
 - [x] Network Monitoring
+- [x] File System Monitoring
 - [ ] File Integrity Monitoring
 - [ ] WebUI for rule management
 - [ ] WebUI for alert management

@@ -1,5 +1,33 @@
 [
     {
+        "name": "/etc/passwd",
+        "description": "/etc/passwd",
+        "type": "file",
+        "severity": 3,
+        "is_enable": true
+    }, 
+    {
+        "name": "/etc/shadow",
+        "description": "/etc/shadow",
+        "type": "file",
+        "severity": 3,
+        "is_enable": true
+    }, 
+    {
+        "name": "/etc/sudoers",
+        "description": "/etc/sudoers",
+        "type": "file",
+        "severity": 3,
+        "is_enable": true
+    }, 
+    {
+        "name": "/var/www/html",
+        "description": "/var/www/html",
+        "type": "file",
+        "severity": 3,
+        "is_enable": true
+    },
+    {
         "name": "Bash Reverse Shell",
         "description": "Bash Reverse Shell",
         "type": "process",
