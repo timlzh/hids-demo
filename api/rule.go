@@ -3,7 +3,53 @@ package api
 import (
 	"hids/db"
 	"hids/model"
+	"hids/utils"
 )
+
+// ReadRuleFromJson
+//
+//	@param path string
+//	@return err error
+func ReadRuleFromJson(path string) (err error) {
+	rules := []model.Rule{}
+	err = utils.ReadJson(path, &rules)
+	if err != nil {
+		return
+	}
+
+	for _, rule := range rules {
+		name := rule.Name
+		rules, err = GetRulesByField("name", name)
+		if err != nil {
+			return
+		}
+		if len(rules) > 0 {
+			rule.ID = rules[0].ID
+			err = UpdateRule(&rule)
+			if err != nil {
+				return
+			}
+			err = DeleteExpressionByRuleId(rule.ID)
+			if err != nil {
+				return
+			}
+		} else {
+			err = CreateRule(&rule)
+			if err != nil {
+				return
+			}
+		}
+
+		for _, expression := range rule.Expressions {
+			expression.RuleID = rule.ID
+			err = CreateExpression(&expression)
+			if err != nil {
+				return
+			}
+		}
+	}
+	return
+}
 
 func CreateRule(rule *model.Rule) (err error) {
 	err = db.DB.Create(rule).Error

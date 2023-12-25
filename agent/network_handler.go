@@ -18,7 +18,7 @@ import (
 func getPacketInfo(pkt *pcap.Packet, deviceIP string) model.Packet {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Println("getPacketInfo panic: ", err)
+			// log.Println("getPacketInfo panic: ", err)
 			return
 		}
 	}()

@@ -14,7 +14,7 @@ import (
 //
 //	@param ip string
 //	@param port int
-func networkMonitorStart(ip string, port int) {
+func networkMonitorStart() {
 	intertfaceName := config.GetConfig().Network.Monitor.Interface
 
 	devices, err := pcap.Findalldevs()

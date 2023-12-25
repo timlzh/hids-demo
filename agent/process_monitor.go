@@ -23,7 +23,7 @@ import (
 //	@param ip string
 //	@param port int
 func processMonitorStart(ip string, port int) {
-	log.Println(fmt.Sprintf("Starting System Monitor Tunnel on %s:%d", ip, port))
+	log.Printf("Starting System Monitor Tunnel on %s:%d", ip, port)
 
 	udpAddr, err := net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", ip, port))
 	if err != nil {

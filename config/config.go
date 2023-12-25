@@ -38,6 +38,10 @@ type Config struct {
 			Interface string `yaml:"interface"`
 		} `yaml:"monitor"`
 	} `yaml:"network"`
+
+	Rule struct {
+		Path string `yaml:"path"`
+	} `yaml:"rule"`
 }
 
 var config *Config

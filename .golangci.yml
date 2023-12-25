@@ -1,0 +1,27 @@
+run:
+  skip-dirs:
+    - gopcap
+
+linters-settings:
+  staticcheck:
+    checks: ["all"]
+  gofumpt:
+    module-path: "hids"
+    extra-rules: true
+  goimports:
+    local-prefixes: "hids"
+
+linters:
+  enable:
+    - unused
+    - errcheck
+    - gosimple
+    - goimports
+    - gofumpt
+    - govet
+    - ineffassign
+    - staticcheck
+    - typecheck
+    - rowserrcheck
+    - unconvert
+    - unparam

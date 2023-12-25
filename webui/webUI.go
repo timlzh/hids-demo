@@ -1,9 +1,10 @@
 package webui
 
 import (
-	"github.com/gin-gonic/gin"
 	"hids/config"
 	"hids/webui/controller"
+
+	"github.com/gin-gonic/gin"
 )
 
 func Run() {
@@ -20,5 +21,8 @@ func Run() {
 		apiGroup.DELETE("/rule/:id", controller.DeleteRule)
 	}
 
-	r.Run(config.GetConfig().WebUI.Host + ":" + config.GetConfig().WebUI.Port)
+	err := r.Run(config.GetConfig().WebUI.Host + ":" + config.GetConfig().WebUI.Port)
+	if err != nil {
+		panic(err)
+	}
 }

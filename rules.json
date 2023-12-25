@@ -1,0 +1,128 @@
+[
+    {
+        "name": "Bash Reverse Shell",
+        "description": "Bash Reverse Shell",
+        "type": "process",
+        "severity": 5,
+        "is_enable": true,
+        "expressions": [
+            {
+                "field": "cmdline",
+                "expression": "bash\\s+-i\\s+>&\\s+/dev/tcp/.*?",
+                "is_regex": true
+            }
+        ]
+    },
+    {
+        "name": "Python Reverse Shell",
+        "description": "Python Reverse Shell",
+        "type": "process",
+        "severity": 5,
+        "is_enable": true,
+        "expressions": [
+            {
+                "field": "cmdline",
+                "expression": "python.*?import.*?socket,subprocess,os;.*?",
+                "is_regex": true
+            }
+        ]
+    },
+    {
+        "name": "Perl Reverse Shell",
+        "description": "Perl Reverse Shell",
+        "type": "process",
+        "severity": 5,
+        "is_enable": true,
+        "expressions": [
+            {
+                "field": "cmdline",
+                "expression": "perl.*?use.*?Socket;.*?",
+                "is_regex": true
+            }
+        ]
+    },
+    {
+        "name": "PHP Reverse Shell",
+        "description": "PHP Reverse Shell",
+        "type": "process",
+        "severity": 5,
+        "is_enable": true,
+        "expressions": [
+            {
+                "field": "cmdline",
+                "expression": "php.*?fsockopen.*?exec.*?/bin/sh.*?",
+                "is_regex": true
+            }
+        ]
+    },
+    {
+        "name": "Netcat Reverse Shell",
+        "description": "Netcat Reverse Shell",
+        "type": "process",
+        "severity": 5,
+        "is_enable": true,
+        "expressions": [
+            {
+                "field": "cmdline",
+                "expression": "nc.*?-e.*?/bin/sh.*?",
+                "is_regex": true
+            }
+        ]
+    },
+    {
+        "name": "Java Reverse Shell",
+        "description": "Java Reverse Shell",
+        "type": "process",
+        "severity": 5,
+        "is_enable": true,
+        "expressions": [
+            {
+                "field": "cmdline",
+                "expression": "java.*?java.net.Socket.*?",
+                "is_regex": true
+            }
+        ]
+    },
+    {
+        "name": "Ruby Reverse Shell",
+        "description": "Ruby Reverse Shell",
+        "type": "process",
+        "severity": 5,
+        "is_enable": true,
+        "expressions": [
+            {
+                "field": "cmdline",
+                "expression": "ruby.*?require.*?socket.*?",
+                "is_regex": true
+            }
+        ]
+    },
+    {
+        "name": "NodeJS Reverse Shell",
+        "description": "NodeJS Reverse Shell",
+        "type": "process",
+        "severity": 5,
+        "is_enable": true,
+        "expressions": [
+            {
+                "field": "cmdline",
+                "expression": "node.*?require.*?net.*?",
+                "is_regex": true
+            }
+        ]
+    },
+    {
+        "name": "Sql Injection",
+        "description": "Sql Injection",
+        "type": "network",
+        "severity": 2,
+        "is_enable": true,
+        "expressions": [
+            {
+                "field": "payload",
+                "expression": "select.*?from.*?",
+                "is_regex": true
+            }
+        ]
+    }
+]

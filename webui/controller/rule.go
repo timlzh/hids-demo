@@ -70,7 +70,7 @@ func CreateRule(c *gin.Context) {
 			Field:      expression.Field,
 			Expression: expression.Expression,
 			IsRegex:    expression.IsRegex,
-			RuleId:     modelRule.ID,
+			RuleID:     modelRule.ID,
 		}
 
 		if err := api.CreateExpression(&modelExpression); err != nil {
@@ -138,7 +138,7 @@ func UpdateRule(c *gin.Context) {
 			Field:      expression.Field,
 			Expression: expression.Expression,
 			IsRegex:    expression.IsRegex,
-			RuleId:     modelRule.ID,
+			RuleID:     modelRule.ID,
 		}
 
 		if err := api.CreateExpression(&modelExpression); err != nil {
